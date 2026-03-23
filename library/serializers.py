@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Book, IssueBook, Reservation, Author, Category
 from django.contrib.auth.models import User
 
-
+# Serializers for API endpoints
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author

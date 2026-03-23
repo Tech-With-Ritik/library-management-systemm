@@ -15,7 +15,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 
 
-
+# Create your views here.
 def home(request):
     books = Book.objects.all()[:6]  # Show only 6 books on home page
     return render(request, 'home.html', {'books': books})
