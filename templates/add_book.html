@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Book{% else %}Add New Book{% endif %} - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %} me-2"></i>
+                        {% if is_edit %}Edit Book{% else %}Add New Book{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="fas fa-book me-1"></i>Title <span class="text-danger">*</span>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.title.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.isbn.id_for_label }}" class="form-label">
+                                    <i class="fas fa-hashtag me-1"></i>ISBN <span class="text-danger">*</span>
+                                </label>
+                                {{ form.isbn }}
+                                {% if form.isbn.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.isbn.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Enter the book's ISBN number</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.author.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Author <span class="text-danger">*</span>
+                                </label>
+                                {{ form.author }}
+                                {% if form.author.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.author.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addAuthorCollapse">
+                                        <i class="fas fa-plus me-1"></i>Add New Author
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Category <span class="text-danger">*</span>
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.category.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addCategoryCollapse">
+                                        <i class="fas fa-plus me-1"></i>Add New Category
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add New Author Collapse -->
+                        <div class="collapse mb-3" id="addAuthorCollapse">
+                            <div class="card card-body bg-light">
+                                <h6><i class="fas fa-user-plus me-1"></i>Add New Author</h6>
+                                <form id="addAuthorForm" class="row g-2">
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="newAuthorName" placeholder="Author name" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-plus me-1"></i>Add Author
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Add New Category Collapse -->
+                        <div class="collapse mb-3" id="addCategoryCollapse">
+                            <div class="card card-body bg-light">
+                                <h6><i class="fas fa-tag me-1"></i>Add New Category</h6>
+                                <form id="addCategoryForm" class="row g-2">
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="newCategoryName" placeholder="Category name" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-plus me-1"></i>Add Category
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Provide a brief description of the book</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                    <i class="fas fa-cubes me-1"></i>Quantity <span class="text-danger">*</span>
+                                </label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.quantity.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Number of copies available</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cover.id_for_label }}" class="form-label">
+                                    <i class="fas fa-image me-1"></i>Cover Image
+                                </label>
+                                {{ form.cover }}
+                                {% if form.cover.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cover.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Upload a cover image (optional)</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Books
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>{% if is_edit %}Update Book{% else %}Add Book{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                            <h5>Total Books</h5>
+                            <h3 class="text-primary">{{ total_books|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-2x text-success mb-2"></i>
+                            <h5>Authors</h5>
+                            <h3 class="text-success">{{ total_authors|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-tags fa-2x text-info mb-2"></i>
+                            <h5>Categories</h5>
+                            <h3 class="text-info">{{ total_categories|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+}
+
+.invalid-feedback {
+    display: block;
+}
+</style>
+
+{% block extra_js %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+
+// Add new author
+document.getElementById('addAuthorForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const authorName = document.getElementById('newAuthorName').value.trim();
+
+    if (authorName) {
+        fetch('/api/authors/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ name: authorName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                // Add to select dropdown
+                const select = document.getElementById('id_author');
+                const option = new Option(authorName, data.id);
+                select.appendChild(option);
+                select.value = data.id;
+
+                // Close collapse and show success
+                bootstrap.Collapse.getInstance(document.getElementById('addAuthorCollapse')).hide();
+                document.getElementById('newAuthorName').value = '';
+                showNotification('Author added successfully!', 'success');
+            } else {
+                showNotification('Error adding author', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error adding author', 'error');
+        });
+    }
+});
+
+// Add new category
+document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const categoryName = document.getElementById('newCategoryName').value.trim();
+
+    if (categoryName) {
+        fetch('/api/categories/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ name: categoryName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                // Add to select dropdown
+                const select = document.getElementById('id_category');
+                const option = new Option(categoryName, data.id);
+                select.appendChild(option);
+                select.value = data.id;
+
+                // Close collapse and show success
+                bootstrap.Collapse.getInstance(document.getElementById('addCategoryCollapse')).hide();
+                document.getElementById('newCategoryName').value = '';
+                showNotification('Category added successfully!', 'success');
+            } else {
+                showNotification('Error adding category', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error adding category', 'error');
+        });
+    }
+});
+
+// Notification function
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }} - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'book_list' %}">Books</a></li>
+            <li class="breadcrumb-item active">{{ book.title|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Book Image and Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                {% if book.cover %}
+                    <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 400px;">
+                        <i class="fas fa-book fa-4x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        {% if user_issue %}
+                            <!-- User has this book issued -->
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>You have this book issued</strong><br>
+                                Issued: {{ user_issue.issue_date|date:"M d, Y" }}<br>
+                                Due: {{ user_issue.due_date|date:"M d, Y" }}
+                                {% if user_issue.due_date < user_issue.issue_date|date:"Y-m-d" %}
+                                    <br><span class="text-danger">Overdue!</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'return_book' book.id %}" class="btn btn-warning btn-lg w-100 mb-2">
+                                <i class="fas fa-undo me-2"></i>Return Book
+                            </a>
+                        {% elif book.available_quantity > 0 %}
+                            <a href="{% url 'issue_book' book.id %}" class="btn btn-success btn-lg w-100 mb-2">
+                                <i class="fas fa-hand-holding me-2"></i>Issue Book
+                            </a>
+                        {% else %}
+                            <a href="{% url 'reserve_book' book.id %}" class="btn btn-warning btn-lg w-100 mb-2">
+                                <i class="fas fa-clock me-2"></i>Reserve Book
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Issue
+                        </a>
+                    {% endif %}
+
+                    <!-- Availability Status -->
+                    <div class="text-center">
+                        <span class="badge fs-6 bg-{% if book.available_quantity > 0 %}success{% else %}danger{% endif %} p-2">
+                            {{ book.available_quantity }} of {{ book.quantity }} available
+                        </span>
+                    </div>
+
+                    <!-- QR Code -->
+                    {% if book.qr_code %}
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-info" onclick="showQR('{{ book.qr_code.url }}', '{{ book.title }}')">
+                                <i class="fas fa-qrcode me-2"></i>View QR Code
+                            </button>
+                        </div>
+                    {% endif %}
+
+                    <!-- Admin Edit Button -->
+                    {% if user.is_staff %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'edit_book' book.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Book
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Details -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ book.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Book Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Book Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold"><i class="fas fa-user me-2"></i>Author:</td>
+                                    <td>{{ book.author.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold"><i class="fas fa-tag me-2"></i>Category:</td>
+                                    <td>{{ book.category.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold"><i class="fas fa-barcode me-2"></i>ISBN:</td>
+                                    <td>{{ book.isbn }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold"><i class="fas fa-calendar me-2"></i>Added:</td>
+                                    <td>{{ book.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Availability</h5>
+                            <div class="mb-3">
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-{% if book.available_quantity > 0 %}success{% else %}danger{% endif %}"
+                                         style="width: {{ availability_percentage }}%">
+                                        {{ book.available_quantity }} / {{ book.quantity }}
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mb-2">
+                                <strong>Total Copies:</strong> {{ book.quantity }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Available:</strong>
+                                <span class="badge bg-{% if book.available_quantity > 0 %}success{% else %}danger{% endif %}">
+                                    {{ book.available_quantity }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    {% if book.description %}
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">Description</h5>
+                            <p class="lead">{{ book.description }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Related Books -->
+                    {% if related_books %}
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">More Books by {{ book.author.name }}</h5>
+                            <div class="row">
+                                {% for related_book in related_books %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card h-100">
+                                            {% if related_book.cover %}
+                                                <img src="{{ related_book.cover.url }}" class="card-img-top" alt="{{ related_book.title }}" style="height: 150px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 150px;">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title small mb-1">{{ related_book.title|truncatechars:25 }}</h6>
+                                                <a href="{% url 'book_detail' related_book.id %}" class="btn btn-sm btn-outline-primary w-100">
+                                                    View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code - <span id="qrTitle"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrImage" src="" alt="QR Code" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showQR(qrUrl, title) {
+    document.getElementById('qrImage').src = qrUrl;
+    document.getElementById('qrTitle').textContent = title;
+    new bootstrap.Modal(document.getElementById('qrModal')).show();
+}
+</script>
+{% endblock %}
